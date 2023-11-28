@@ -25,7 +25,9 @@ jobs:
           channel: 'stable'
       
       - name: Disable flutter analytics
-        run: flutter config --no-analytics
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
 
       - run: flutter pub get
 
@@ -51,10 +53,19 @@ jobs:
         env:
           X_KEYSTORE_PATH: ${{ env.X_KEYSTORE_PATH }}
 
+      - uses: actions/upload-artifact@v1      
+        with:        
+          name: release-apk        
+          path: build/app/outputs/apk/release/app-release.apk
+
+  release:
+    name: Create github release
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/app/outputs/flutter-apk/*-release.apk
           tag_name: v${{ env.APP_VERSION }}
           name: ${{ env.COMMIT_MESSAGE }}
           fail_on_unmatched_files: true
